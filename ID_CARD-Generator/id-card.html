@@ -97,7 +97,10 @@
                         <div>
                             <div class="mb-3">
                                 <label for="excelFile" class="form-label">Upload Excel File</label>
-                                <input type="file" class="form-control" id="excelFile" accept=".xlsx,.xls">
+                                <div class="d-flex align-items-center gap-2">
+                                    <input type="file" class="form-control" id="excelFile" accept=".xlsx,.xls">
+                                    <button type="button" id="downloadExcelTemplate" class="btn btn-outline-secondary btn-sm">Download Excel Template</button>
+                                </div>
                             </div>
                             <div class="mb-3">
                                 <label for="bgImgInput" class="form-label">ID Card Image (SVG)</label>
@@ -112,10 +115,10 @@
                                 <input type="text" class="form-control" id="input"
                                     placeholder="e.g. 1 or 1-3 or 1,20,55">
                             </div>
-                            <div class="mb-3">
+                            <!-- <div class="mb-3">
                                 <label for="session" class="form-label">Session</label>
                                 <input type="text" class="form-control" id="session" placeholder="Enter session">
-                            </div>
+                            </div> -->
                             <div class="d-grid">
                                 <button type="button" id="load" class="btn btn-primary">Submit</button>
                             </div>
@@ -126,7 +129,8 @@
         </div>
     </div>
     <div id="outputSection" style="display:none;" class="mt-4">
-        <button id="downloadBtn" class="btn btn-success mb-3">Download as PDF</button>
+        <button id="downloadBtn" class="btn btn-success mb-3">Download as PDF(Font Side)</button>
+        <button id="downloadBtntwo" class="btn btn-success mb-3">Download as PDF(Back Side)</button>
         <div id="tablesContainer"></div>
     </div>
 
@@ -140,6 +144,18 @@
             document.getElementById('outputSection').style.display = "none";
         }
         setInitialVisibility();
+
+        // Download Excel Template Button functionality
+        document.getElementById('downloadExcelTemplate').addEventListener('click', function () {
+            // Create a simple Excel file as a template
+            const wb = XLSX.utils.book_new();
+            const ws = XLSX.utils.aoa_to_sheet([
+                ["roll", "name", "course", "co", "add", "batch", "session"], // headers
+                ["1", "John Doe", "BSc", "CO1", "Address", "2025", "2025-2026"] // example row
+            ]);
+            XLSX.utils.book_append_sheet(wb, ws, "Sheet1");
+            XLSX.writeFile(wb, "ID-Card-Template.xlsx");
+        });
 
         // Background image input
         document.getElementById('bgImgInput').addEventListener('change', function (e) {
@@ -203,7 +219,7 @@
 
         document.getElementById('load').addEventListener('click', function () {
             const input = document.getElementById('input').value.trim();
-            const session = document.getElementById('session').value.trim();
+            // const session = document.getElementById('session').value.trim();
             const container = document.getElementById('tablesContainer');
 
             if (!element.length) {
@@ -254,7 +270,7 @@
             document.getElementById('excelFile').style.display = "none";
             document.getElementById('bgImgInput').style.display = "none";
             document.getElementById('input').style.display = "none";
-            document.getElementById('session').style.display = "none";
+            // document.getElementById('session').style.display = "none";
             document.getElementById('imgFileInput').style.display = "none";
             document.getElementById('main-content').style.display = "none";
             document.getElementById('load').style.display = "none";
@@ -307,12 +323,12 @@
 
                 // Create round image div (absolute, above bg, below labels)
                 const roundDiv = document.createElement("img");
-                roundDiv.style.width = "80px";
-                roundDiv.style.height = "80px";
+                roundDiv.style.width = "86px";
+                roundDiv.style.height = "84.5px";
                 roundDiv.style.borderRadius = "50%";
                 roundDiv.style.position = "absolute";
-                roundDiv.style.top = "40px";
-                roundDiv.style.left = "85px";
+                roundDiv.style.top = "96px";
+                roundDiv.style.left = "84px";
                 roundDiv.style.backgroundPosition = "center center";
                 roundDiv.style.backgroundSize = "cover";
                 roundDiv.style.zIndex = "1";
@@ -338,13 +354,13 @@
 
                 // Create labels with custom positions
                 const labels = [
-                    { text: `${e.name}`, style: "top:207px;left:4px; color:red; text-transform: uppercase; font-size: 20px; font-weight: bold;width: 97%; text-align: center;" },
-                    { text: `${e.roll}`, style: "top:230px;left:65px;" },
-                    { text: `${e.course}`, style: "top:230px;left:194px;" },
-                    { text: `${e.co}`, style: "top:247px;left:48px;" },
-                    { text: `${e.add}`, style: "top:262px;left:89px;" },
-                    { text: `${e.batch}`, style: "top:281px;left:70px;" },
-                    { text: `${session}`, style: "top:281px;left:194px;" }
+                    { text: `${e.name}`, style: "top:207px;left:4px; color:red; text-transform: uppercase; font-size: 13.183 pt; font-weight: bold;width: 97%; text-align: center; font-family: Arial;" },
+                    { text: `${e.roll}`, style: "top:215px;left:56px; font-family: Arial;" },
+                    { text: `${e.course}`, style: "top:212px;left:194px; text-transform: uppercase; font-family: Arial;" },
+                    { text: `${e.co}`, style: "top:247px;left:48px; font-family: Arial; text-transform: uppercase;" },
+                    { text: `${e.add}`, style: "top:262px;left:89px; font-family: Arial; text-transform: uppercase;" },
+                    { text: `${e.batch}`, style: "top:281px;left:70px; font-family: Arial; text-transform: uppercase;" },
+                    { text: `${e.session}`, style: "top:281px;left:194px; font-family: Arial; text-transform: uppercase;" }
                 ];
 
                 labels.forEach(l => {
