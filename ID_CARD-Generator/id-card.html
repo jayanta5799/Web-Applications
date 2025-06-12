@@ -8,6 +8,13 @@
     <!-- Bootstrap CSS -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.6/dist/css/bootstrap.min.css" rel="stylesheet">
     <style>
+        @font-face {
+            font-family: 'MyFont1';
+            src: url('../Fonts/eras-itc-bold.ttf') format('truetype');
+            font-weight: normal;
+            font-style: normal;
+        }
+
         body {
             background: linear-gradient(135deg, #6d54b5 0%, #2c2638 100%);
             min-height: 100vh;
@@ -66,19 +73,19 @@
             overflow: scroll;
             display: flex;
             position: relative;
+        }
 
-            #downloadBtn {
-                position: fixed;
-                left: 0px;
-                top: 0;
-                z-index: 99;
-                margin: 15px;
-            }
+        #downloadBtn {
+            position: fixed;
+            left: 0px;
+            top: 0;
+            z-index: 99;
+            margin: 15px;
+        }
 
-            #tablesContainer {
-                align-self: center;
-                justify-self: center;
-            }
+        #tablesContainer {
+            align-self: center;
+            justify-self: center;
         }
     </style>
     <script src="https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js"></script>
@@ -93,7 +100,6 @@
                 <div class="card shadow">
                     <div class="card-body">
                         <h3 class="mb-4 text-center">ID Card Generator</h3>
-                        <!-- No form tag -->
                         <div>
                             <div class="mb-3">
                                 <label for="excelFile" class="form-label">Upload Excel File</label>
@@ -284,13 +290,14 @@
                 const rowDiv = document.createElement("div");
                 rowDiv.style.display = "flex";
                 rowDiv.style.flexWrap = "wrap";
-                rowDiv.style.rowGap = "10px";
-                rowDiv.style.columnGap = "3.14%";
                 rowDiv.style.alignItems = "start";
                 rowDiv.style.backgroundColor = "gray";
                 rowDiv.style.height = "17.5in";
                 rowDiv.style.width = "11.5in";
                 rowDiv.style.position = "relative";
+                rowDiv.style.rowGap = "0";
+                rowDiv.style.columnGap = "34.6px";
+                rowDiv.style.boxSizing = "border-box";
                 return rowDiv;
             }
 
@@ -309,6 +316,9 @@
                 wrapper.style.width = "250px";
                 wrapper.style.height = "340px";
                 wrapper.style.position = "relative";
+                wrapper.style.margin = "0";
+                wrapper.style.padding = "0";
+                wrapper.style.boxSizing = "border-box";
 
                 // Add a background img tag before roundDiv
                 const bgImg = document.createElement("img");
@@ -316,9 +326,12 @@
                 bgImg.style.position = "absolute";
                 bgImg.style.top = "0";
                 bgImg.style.left = "0";
-                bgImg.style.width = "250px";
-                bgImg.style.height = "340px";
+                bgImg.style.width = "100%";
+                bgImg.style.height = "100%";
                 bgImg.style.zIndex = "0";
+                bgImg.style.padding = "0";
+                bgImg.style.margin = "0";
+                bgImg.style.boxSizing = "border-box";
                 wrapper.appendChild(bgImg);
 
                 // Create round image div (absolute, above bg, below labels)
@@ -354,13 +367,13 @@
 
                 // Create labels with custom positions
                 const labels = [
-                    { text: `${e.name}`, style: "top:207px;left:4px; color:red; text-transform: uppercase; font-size: 13.183 pt; font-weight: bold;width: 97%; text-align: center; font-family: Arial;" },
-                    { text: `${e.roll}`, style: "top:215px;left:56px; font-family: Arial;" },
-                    { text: `${e.course}`, style: "top:212px;left:194px; text-transform: uppercase; font-family: Arial;" },
-                    { text: `${e.co}`, style: "top:247px;left:48px; font-family: Arial; text-transform: uppercase;" },
-                    { text: `${e.add}`, style: "top:262px;left:89px; font-family: Arial; text-transform: uppercase;" },
-                    { text: `${e.batch}`, style: "top:281px;left:70px; font-family: Arial; text-transform: uppercase;" },
-                    { text: `${e.session}`, style: "top:281px;left:194px; font-family: Arial; text-transform: uppercase;" }
+                    { text: `${e.name}`, style: "top:193px;left:4px; color:red; text-transform: uppercase; font-size: 13.183pt; font-weight: bold;width: 97%; text-align: center; font-family: MyFont1, Arial;" },
+                    { text: `${e.roll}`, style: "top:215px;left:57px; font-family: Arial; font-size: 9.587pt;"},
+                    { text: `${e.course}`, style: "top:215.5px;left:195px; text-transform: uppercase; font-family: Arial; font-size: 9.587pt;" },
+                    { text: `${e.co}`, style: "top:231.8px;left:44px; font-family: Arial; text-transform: uppercase;font-size: 9.587pt;" },
+                    { text: `${e.add}`, style: "top:247px;left:82px; font-family: Arial; text-transform: uppercase;font-size: 9.587pt," },
+                    { text: `${e.batch}`, style: "top:264px;left:66px; font-family: Arial; text-transform: uppercase; font-size: 9.587pt;" },
+                    { text: `${e.session}`, style: "top:264px;left:193px; font-family: Arial; text-transform: uppercase;font-size: 9.587pt;" }
                 ];
 
                 labels.forEach(l => {
@@ -368,7 +381,7 @@
                     label.innerText = l.text;
                     label.style.position = "absolute";
                     label.style.fontSize = "13px";
-                    label.style.fontWeight = "bold";
+                    // label.style.fontWeight = "bold";
                     label.style.zIndex = "2";
                     l.style.split(";").forEach(s => {
                         if (s.trim()) {
