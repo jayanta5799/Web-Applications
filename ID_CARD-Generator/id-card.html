@@ -109,8 +109,11 @@
                                 </div>
                             </div>
                             <div class="mb-3">
-                                <label for="bgImgInput" class="form-label">ID Card Image (SVG)</label>
-                                <input type="file" class="form-control" id="bgImgInput" accept=".svg,image/svg+xml">
+                                <label for="bgImgInput" class="form-label mb-0">ID Card Image (PNG)</label>
+                                <div class="d-flex align-items-center gap-2">
+                                <input type="file" class="form-control" id="bgImgInput" accept=".png,image/png">
+                                <button type="button" id="downloadBgTemplate" class="btn btn-outline-secondary btn-sm">Download PNG Template</button>
+                                    </div>
                             </div>
                             <div class="mb-3">
                                 <label for="imgFileInput" class="form-label">Students Images</label>
@@ -142,14 +145,18 @@
 
     <script>
         let element = [];
-        let bgImgSrc = "./ID-CARD/FRONT/YCTC.png"; // Default background image
+        let bgImgSrc = "./ID-CARD/FRONT/YCTC.png"; // Default background image (PNG)
         let imgFileMap = {}; // Map roll number to selected file's data URL
 
-        // Hide all except input section at first
-        function setInitialVisibility() {
-            document.getElementById('outputSection').style.display = "none";
-        }
-        setInitialVisibility();
+        // Download PNG Template Button functionality
+        document.getElementById('downloadBgTemplate').addEventListener('click', function () {
+            const link = document.createElement('a');
+            link.href = 'ID-CARD/FRONT/YCTC.png'; // relative path from your HTML file
+            link.download = 'YCTC.png';
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+        });
 
         // Download Excel Template Button functionality
         document.getElementById('downloadExcelTemplate').addEventListener('click', function () {
@@ -159,6 +166,16 @@
                 ["roll", "name", "course", "co", "add", "batch", "session"], // headers
                 ["1", "John Doe", "BSc", "CO1", "Address", "2025", "2025-2026"] // example row
             ]);
+            // Set column widths (wch: width in characters)
+            ws['!cols'] = [
+                { wch: 10 }, // roll
+                { wch: 20 }, // name
+                { wch: 10 }, // course
+                { wch: 10 }, // co
+                { wch: 22 }, // add (address column, wider)
+                { wch: 10 }, // batch
+                { wch: 15 }  // session
+            ];
             XLSX.utils.book_append_sheet(wb, ws, "Sheet1");
             XLSX.writeFile(wb, "ID-Card-Template.xlsx");
         });
@@ -225,14 +242,12 @@
 
         document.getElementById('load').addEventListener('click', function () {
             const input = document.getElementById('input').value.trim();
-            // const session = document.getElementById('session').value.trim();
             const container = document.getElementById('tablesContainer');
 
             if (!element.length) {
                 alert("Please load an Excel file first!");
                 return;
             }
-            // Ensure user selected more than 1 image file
             if (Object.keys(imgFileMap).length < 1) {
                 alert("Please choose at least two image files for the cards.");
                 return;
@@ -241,7 +256,6 @@
             let results = [];
 
             if (input.includes('-')) {
-                // Range input (e.g. 1-5)
                 const [startRoll, endRoll] = input.split('-').map(Number);
                 if (
                     isNaN(startRoll) || isNaN(endRoll) ||
@@ -253,7 +267,6 @@
                 }
                 results = element.filter(e => Number(e.roll) >= startRoll && Number(e.roll) <= endRoll);
             } else if (input.includes(',')) {
-                // Custom list input (e.g. 1,20,55,63)
                 const rolls = input.split(',').map(r => Number(r.trim())).filter(r => !isNaN(r));
                 if (!rolls.length) {
                     alert("Please enter valid roll numbers separated by commas.");
@@ -262,7 +275,6 @@
                 }
                 results = element.filter(e => rolls.includes(Number(e.roll)));
             } else {
-                // Single roll input
                 const roll = Number(input);
                 if (isNaN(roll) || roll < 1 || roll > Math.max(...element.map(e => Number(e.roll)))) {
                     alert("Please enter a valid roll number (1 or 2)");
@@ -276,7 +288,6 @@
             document.getElementById('excelFile').style.display = "none";
             document.getElementById('bgImgInput').style.display = "none";
             document.getElementById('input').style.display = "none";
-            // document.getElementById('session').style.display = "none";
             document.getElementById('imgFileInput').style.display = "none";
             document.getElementById('main-content').style.display = "none";
             document.getElementById('load').style.display = "none";
@@ -285,18 +296,18 @@
             // Clear previous tables
             container.innerHTML = "";
 
-            // Helper to create a rowDiv
             function createRowDiv() {
                 const rowDiv = document.createElement("div");
                 rowDiv.style.display = "flex";
                 rowDiv.style.flexWrap = "wrap";
-                rowDiv.style.alignItems = "start";
-                rowDiv.style.backgroundColor = "gray";
+                rowDiv.style.alignItems = "flex-start";
+                rowDiv.style.alignContent = "flex-start";
+                rowDiv.style.backgroundColor = "white";
                 rowDiv.style.height = "17.5in";
                 rowDiv.style.width = "11.5in";
                 rowDiv.style.position = "relative";
-                rowDiv.style.rowGap = "0";
-                rowDiv.style.columnGap = "34.6px";
+                rowDiv.style.rowGap = "66px";
+                rowDiv.style.columnGap = "34.5px";
                 rowDiv.style.boxSizing = "border-box";
                 return rowDiv;
             }
@@ -309,10 +320,6 @@
                 // Create a wrapper div for the round div and labels
                 const wrapper = document.createElement("div");
                 wrapper.style.background = "White";
-                wrapper.style.display = "flex";
-                wrapper.style.flexDirection = "column";
-                wrapper.style.alignItems = "center";
-                wrapper.style.justifyContent = "end";
                 wrapper.style.width = "250px";
                 wrapper.style.height = "340px";
                 wrapper.style.position = "relative";
@@ -320,19 +327,11 @@
                 wrapper.style.padding = "0";
                 wrapper.style.boxSizing = "border-box";
 
-                // Add a background img tag before roundDiv
-                const bgImg = document.createElement("img");
-                bgImg.src = bgImgSrc;
-                bgImg.style.position = "absolute";
-                bgImg.style.top = "0";
-                bgImg.style.left = "0";
-                bgImg.style.width = "100%";
-                bgImg.style.height = "100%";
-                bgImg.style.zIndex = "0";
-                bgImg.style.padding = "0";
-                bgImg.style.margin = "0";
-                bgImg.style.boxSizing = "border-box";
-                wrapper.appendChild(bgImg);
+                // Use PNG as CSS background-image for html2canvas compatibility
+                wrapper.style.backgroundImage = `url('${bgImgSrc}')`;
+                wrapper.style.backgroundSize = "100% 100%"; // Ensures PNG fits both width and height
+                wrapper.style.backgroundPosition = "center";
+                wrapper.style.backgroundRepeat = "no-repeat";
 
                 // Create round image div (absolute, above bg, below labels)
                 const roundDiv = document.createElement("img");
@@ -371,7 +370,7 @@
                     { text: `${e.roll}`, style: "top:215px;left:57px; font-family: Arial; font-size: 9.587pt;"},
                     { text: `${e.course}`, style: "top:215.5px;left:195px; text-transform: uppercase; font-family: Arial; font-size: 9.587pt;" },
                     { text: `${e.co}`, style: "top:231.8px;left:44px; font-family: Arial; text-transform: uppercase;font-size: 9.587pt;" },
-                    { text: `${e.add}`, style: "top:247px;left:82px; font-family: Arial; text-transform: uppercase;font-size: 9.587pt," },
+                    { text: `${e.add}`, style: "top:247px;left:82px; font-family: Arial; text-transform: uppercase;font-size: 9.587pt;" },
                     { text: `${e.batch}`, style: "top:264px;left:66px; font-family: Arial; text-transform: uppercase; font-size: 9.587pt;" },
                     { text: `${e.session}`, style: "top:264px;left:193px; font-family: Arial; text-transform: uppercase;font-size: 9.587pt;" }
                 ];
@@ -381,7 +380,6 @@
                     label.innerText = l.text;
                     label.style.position = "absolute";
                     label.style.fontSize = "13px";
-                    // label.style.fontWeight = "bold";
                     label.style.zIndex = "2";
                     l.style.split(";").forEach(s => {
                         if (s.trim()) {
@@ -474,5 +472,3 @@
         });
     </script>
 </body>
-
-</html>
