@@ -105,15 +105,15 @@
                                 <label for="excelFile" class="form-label">Upload Excel File</label>
                                 <div class="d-flex align-items-center gap-2">
                                     <input type="file" class="form-control" id="excelFile" accept=".xlsx,.xls">
-                                    <button type="button" id="downloadExcelTemplate" class="btn btn-outline-secondary btn-sm">Download Excel Template</button>
+                                    <button type="button" id="downloadExcelTemplate"
+                                        class="btn btn-outline-secondary btn-sm">Download Excel Template</button>
                                 </div>
                             </div>
-                            <div class="mb-3">
+                            <div class="mb-3 d-flex align-items-center gap-2">
                                 <label for="bgImgInput" class="form-label mb-0">ID Card Image (PNG)</label>
-                                <div class="d-flex align-items-center gap-2">
                                 <input type="file" class="form-control" id="bgImgInput" accept=".png,image/png">
-                                <button type="button" id="downloadBgTemplate" class="btn btn-outline-secondary btn-sm">Download PNG Template</button>
-                                    </div>
+                                <button type="button" id="downloadBgTemplate"
+                                    class="btn btn-outline-secondary btn-sm">Download PNG Template</button>
                             </div>
                             <div class="mb-3">
                                 <label for="imgFileInput" class="form-label">Students Images</label>
@@ -124,10 +124,6 @@
                                 <input type="text" class="form-control" id="input"
                                     placeholder="e.g. 1 or 1-3 or 1,20,55">
                             </div>
-                            <!-- <div class="mb-3">
-                                <label for="session" class="form-label">Session</label>
-                                <input type="text" class="form-control" id="session" placeholder="Enter session">
-                            </div> -->
                             <div class="d-grid">
                                 <button type="button" id="load" class="btn btn-primary">Submit</button>
                             </div>
@@ -367,7 +363,7 @@
                 // Create labels with custom positions
                 const labels = [
                     { text: `${e.name}`, style: "top:193px;left:4px; color:red; text-transform: uppercase; font-size: 13.183pt; font-weight: bold;width: 97%; text-align: center; font-family: MyFont1, Arial;" },
-                    { text: `${e.roll}`, style: "top:215px;left:57px; font-family: Arial; font-size: 9.587pt;"},
+                    { text: `${e.roll}`, style: "top:215px;left:57px; font-family: Arial; font-size: 9.587pt;" },
                     { text: `${e.course}`, style: "top:215.5px;left:195px; text-transform: uppercase; font-family: Arial; font-size: 9.587pt;" },
                     { text: `${e.co}`, style: "top:231.8px;left:44px; font-family: Arial; text-transform: uppercase;font-size: 9.587pt;" },
                     { text: `${e.add}`, style: "top:247px;left:82px; font-family: Arial; text-transform: uppercase;font-size: 9.587pt;" },
@@ -450,11 +446,16 @@
                 return;
             }
 
+            const pxWidth = 1150;
+            const pxHeight = 1750;
+            const pageWidth = pxWidth * 72 / 96;   // ≈ 863
+            const pageHeight = pxHeight * 72 / 96; // ≈ 1312
+
             const jsPDF = window.jspdf ? window.jspdf.jsPDF : window.jsPDF;
             const pdf = new jsPDF({
                 orientation: "portrait",
                 unit: "pt",
-                format: [828, 1260]
+                format: [pageWidth, pageHeight]
             });
 
             for (let i = 0; i < rowDivs.length; i++) {
@@ -465,10 +466,68 @@
                 });
                 const imgData = canvas.toDataURL('image/png');
                 if (i > 0) pdf.addPage();
-                pdf.addImage(imgData, 'PNG', 0, 0, 828, 1260);
+                pdf.addImage(imgData, 'PNG', 0, 0, pageWidth, pageHeight);
             }
 
             pdf.save('ID-Card.pdf');
+        });
+
+        // Download as PDF (Back Side) - places SVG at every wrapper position, matching rowDiv layout
+        document.getElementById('downloadBtntwo').addEventListener('click', async function () {
+            const svgPath = 'ID-CARD/FRONT/YCTC.svg';
+            const cardWidth = 250;
+            const cardHeight = 340;
+            const rowGap = 66;
+            const colGap = 34.5;
+            const cardsPerRow = 4;
+            const pageWidth = 1150;
+            const pageHeight = 1750;
+
+            const rowDivs = document.querySelectorAll('#tablesContainer > div');
+            if (!rowDivs.length) {
+                alert("No cards to download!");
+                return;
+            }
+
+            // Load SVG as image
+            const svgImg = new Image();
+            svgImg.src = svgPath;
+            await new Promise((resolve) => { svgImg.onload = resolve; });
+
+            const jsPDF = window.jspdf ? window.jspdf.jsPDF : window.jsPDF;
+            const pdf = new jsPDF({
+                orientation: "portrait",
+                unit: "pt",
+                format: [pageWidth, pageHeight]
+            });
+
+            for (let page = 0; page < rowDivs.length; page++) {
+                if (page > 0) pdf.addPage();
+                const wrappers = rowDivs[page].querySelectorAll('div');
+                const canvas = document.createElement('canvas');
+                canvas.width = pageWidth * 2;
+                canvas.height = pageHeight * 2;
+                const ctx = canvas.getContext('2d');
+                ctx.fillStyle = "#fff";
+                ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+                for (let i = 0; i < wrappers.length; i++) {
+                    const row = Math.floor(i / cardsPerRow);
+                    const col = i % cardsPerRow;
+                    const x = col * (cardWidth + colGap);
+                    const y = row * (cardHeight + rowGap);
+
+                    ctx.drawImage(
+                        svgImg,
+                        x * 2, y * 2, cardWidth * 2, cardHeight * 2
+                    );
+                }
+
+                const imgData = canvas.toDataURL('image/png');
+                pdf.addImage(imgData, 'PNG', 0, 0, pageWidth, pageHeight);
+            }
+
+            pdf.save('ID-Card-Back.pdf');
         });
     </script>
 </body>
